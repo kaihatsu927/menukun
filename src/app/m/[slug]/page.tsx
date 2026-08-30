@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MenuView } from "@/components/menu-view/MenuView";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { resolveTheme, themeToCssVars } from "@/lib/theme";
 import { getTemplate, TEMPLATES } from "@/lib/templates";
@@ -69,7 +69,7 @@ async function loadMenu(slug: string): Promise<FullMenu | null> {
   if (slug === "demo") return buildDemo();
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: menu } = await supabase
     .from("menus")
     .select("*")
