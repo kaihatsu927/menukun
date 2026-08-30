@@ -15,7 +15,13 @@ function SubmitButton({ label }: { label: string }) {
   );
 }
 
-export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+export function AuthForm({
+  mode,
+  converting = false,
+}: {
+  mode: "signin" | "signup";
+  converting?: boolean;
+}) {
   const action = mode === "signin" ? signIn : signUp;
   const [state, formAction] = useActionState<AuthState, FormData>(action, null);
   const params = useSearchParams();
@@ -60,7 +66,9 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         </p>
       )}
 
-      <SubmitButton label={mode === "signin" ? "ログイン" : "登録する"} />
+      <SubmitButton
+        label={mode === "signin" ? "ログイン" : converting ? "この内容で登録する" : "登録する"}
+      />
     </form>
   );
 }

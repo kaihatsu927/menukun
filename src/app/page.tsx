@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { LinkButton } from "@/components/ui";
+import { LinkButton, Button } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { SetupNotice } from "@/components/setup-notice";
+import { startAnonymous } from "@/app/auth/actions";
 import { TEMPLATES } from "@/lib/templates";
 
 export default async function LandingPage() {
@@ -12,6 +13,8 @@ export default async function LandingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const loggedIn = !!user && !user.is_anonymous;
+  const hasDraft = !!user && user.is_anonymous;
 
   return (
     <main className="min-h-screen">
@@ -20,7 +23,7 @@ export default async function LandingPage() {
         <nav className="flex items-center gap-2">
           {user ? (
             <LinkButton href="/dashboard" size="sm">
-              管理画面へ
+              {loggedIn ? "管理画面へ" : "作成中のメニュー"}
             </LinkButton>
           ) : (
             <>
@@ -28,7 +31,7 @@ export default async function LandingPage() {
                 ログイン
               </LinkButton>
               <LinkButton href="/signup" size="sm">
-                無料ではじめる
+                アカウント作成
               </LinkButton>
             </>
           )}
@@ -49,14 +52,21 @@ export default async function LandingPage() {
           できあがったメニューは公開URLをお店のサイトに貼るだけで表示できます。
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <LinkButton href={user ? "/dashboard" : "/signup"}>
-            {user ? "メニューを作る" : "無料でメニューを作る"}
-          </LinkButton>
-          <LinkButton href="/try" variant="secondary">
-            登録なしでさわって試す
-          </LinkButton>
+          {loggedIn ? (
+            <LinkButton href="/dashboard">メニューを作る</LinkButton>
+          ) : (
+            <form action={startAnonymous}>
+              <Button type="submit">{hasDraft ? "メニューづくりを続ける" : "登録せずに作る"}</Button>
+            </form>
+          )}
+          {!loggedIn && (
+            <LinkButton href="/signup" variant="secondary">
+              アカウントを作る
+            </LinkButton>
+          )}
         </div>
         <p className="mt-3 text-xs text-stone-400">
+          {!loggedIn && "「登録せずに作る」ならメール登録不要。あとからアカウント登録もできます。 "}
           完成イメージは{" "}
           <Link href="/m/demo" className="underline underline-offset-2 hover:text-ink">
             サンプルメニュー

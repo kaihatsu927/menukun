@@ -12,6 +12,28 @@ function readCreds(formData: FormData) {
   return { email, password };
 }
 
+/** 登録せずにすぐ使い始める（匿名ユーザーを作成） */
+export async function startAnonymous(formData?: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const next = String(formData?.get("next") ?? "/dashboard/new") || "/dashboard/new";
+
+  // すでにログイン済み（匿名含む）ならそのまま進む
+  if (!user) {
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      console.error("[startAnonymous]", error.status, error.code, error.message);
+      redirect("/signup?anon=unavailable");
+    }
+  }
+
+  revalidatePath("/", "layout");
+  redirect(next.startsWith("/") ? next : "/dashboard/new");
+}
+
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const { email, password } = readCreds(formData);
   const next = String(formData.get("next") ?? "/dashboard") || "/dashboard";
@@ -37,6 +59,33 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   if (password.length < 6) return { error: "パスワードは6文字以上にしてください。" };
 
   const supabase = await createClient();
+  const {
+    data: { user: current },
+  } = await supabase.auth.getUser();
+
+  // すでに匿名で使っている場合は「昇格」（メニューを引き継いだままアカウント化）
+  if (current?.is_anonymous) {
+    const { error } = await supabase.auth.updateUser({ email, password });
+    if (error) {
+      console.error("[convert]", error.status, error.code, error.message);
+      if (error.code === "email_exists" || error.status === 422) {
+        return {
+          error:
+            "このメールアドレスは既に使われています。別のアドレスをお使いいただくか、一度ログインしてください。",
+        };
+      }
+      return { error: "アカウント登録に失敗しました。メールアドレスをご確認ください。" };
+    }
+    await supabase
+      .from("profiles")
+      .update({ email, shop_name: shopName || null })
+      .eq("id", current.id);
+
+    revalidatePath("/", "layout");
+    redirect("/dashboard?welcome=1");
+  }
+
+  // 通常の新規登録
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -48,7 +97,6 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     return { error: "登録できませんでした。すでに登録済みのメールアドレスの可能性があります。" };
   }
 
-  // メール確認が不要な設定なら、そのままセッションが発行される
   if (data.session) {
     if (shopName) {
       await supabase.from("profiles").update({ shop_name: shopName }).eq("id", data.user!.id);
