@@ -11,10 +11,17 @@ export const metadata = { title: "メニュー一覧" };
 export default async function DashboardPage() {
   if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
-  const { data: menus } = await supabase
-    .from("menus")
-    .select("*")
-    .order("updated_at", { ascending: false });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: menus } = user
+    ? await supabase
+        .from("menus")
+        .select("*")
+        .eq("owner_id", user.id)
+        .order("updated_at", { ascending: false })
+    : { data: [] };
 
   const list = (menus ?? []) as Menu[];
 
