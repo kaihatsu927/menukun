@@ -1,0 +1,8 @@
+# 改行コードを LF に正規化（Vercel などの Linux 環境と揃える）
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary

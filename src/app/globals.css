@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "Meiryo", sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #1c1917;
+  background: #faf9f7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 数値入力のスピナーを控えめに */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ------- 公開メニュー用のスコープ付きスタイル ------- */
+.menu-scope {
+  background: var(--m-bg);
+  color: var(--m-text);
+  font-family: var(--m-font);
+}
+.menu-scope .m-surface {
+  background: var(--m-surface);
+  border-radius: var(--m-radius);
+}
+.menu-scope .m-sub {
+  color: var(--m-sub);
+}
+.menu-scope .m-accent {
+  color: var(--m-accent);
+}
+.menu-scope .m-accent-bg {
+  background: var(--m-accent);
+  color: var(--m-accent-contrast);
+}
+.menu-scope .m-hairline {
+  border-color: var(--m-hairline);
+}
+.menu-scope .m-border {
+  border-color: var(--m-border);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 999px;
+}
