@@ -11,15 +11,15 @@ HTML の知識がなくても、テンプレートを選んで写真・名前・
 - 🈳 説明や価格、カテゴリーを **使わなくても崩れない**デザイン（空欄は表示されません）
 - 📱 スマホ・タッチパネルでの閲覧に最適化
 
-技術構成：**Next.js（App Router）** + **Supabase**（データベース・ログイン・画像保存）。Vercel にそのままデプロイできます。
+技術構成：**Next.js 15（App Router）** + **Supabase**（データベース・ログイン・画像保存）。**Netlify**（無料枠でも商用可）にデプロイします。Vercel でも動きますが、Vercel の無料 Hobby プランは非商用限定です。
 
 ---
 
 ## 使うために必要なもの（すべて無料枠でOK）
 
 1. [Supabase](https://supabase.com) のアカウント（データ・ログイン・画像の保存先）
-2. [Vercel](https://vercel.com) のアカウント（アプリの公開先）
-3. [GitHub](https://github.com) のアカウント（コードの置き場所。Vercel と連携します）
+2. [Netlify](https://netlify.com) のアカウント（アプリの公開先）
+3. [GitHub](https://github.com) のアカウント（コードの置き場所。Netlify と連携します）
 
 ---
 
@@ -71,28 +71,31 @@ http://localhost:3000 を開く。
 > **http://localhost:3000/try** を開くと、ログインなしで編集画面をひと通り操作できます
 > （「お試しモード」。保存はされません）。
 
-### 6. Vercel にデプロイする
+### 6. Netlify にデプロイする
 
 1. このプロジェクトを GitHub のリポジトリに push
-2. [vercel.com/new](https://vercel.com/new) でそのリポジトリを Import
-3. **Environment Variables** に次の 3 つを追加：
+2. [netlify.com](https://netlify.com) → **Add new site** → **Import an existing project** → **GitHub** → このリポジトリを選択
+3. **Project name** を決める（例 `menukun` → URL が `menukun.netlify.app` に）
+4. **Environment variables** に次の 3 つを追加：
 
    ```
    NEXT_PUBLIC_SUPABASE_URL       = https://xxxx.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY  = eyJhbGciOi...
-   NEXT_PUBLIC_SITE_URL           = https://（あなたのVercelドメイン）
+   NEXT_PUBLIC_SUPABASE_ANON_KEY  = sb_publishable_...
+   NEXT_PUBLIC_SITE_URL           = https://（あなたのNetlifyドメイン）
    ```
 
-   > `NEXT_PUBLIC_SITE_URL` は公開 URL の生成に使います。デプロイ後にドメインが決まったら正しい値に更新して再デプロイしてください。
+5. **Deploy** を押す（ビルド設定は `netlify.toml` にあるので変更不要）
+6. デプロイ後、**プロジェクト構成 → Visitor access → 「公共（Public）」** を選んで保存
+   （Netlify の新規サイトは初期状態が「プライベート」で、一般公開されません）
 
-4. **Deploy** を押す
-
-### 7. Supabase 側に本番 URL を登録
+### 7. （任意）Supabase 側に本番 URL を登録
 
 Supabase → **Authentication → URL Configuration**
 
-- **Site URL**：`https://（あなたのVercelドメイン）`
-- **Redirect URLs** に追加：`https://（あなたのVercelドメイン）/auth/callback`
+- **Site URL**：`https://（あなたのNetlifyドメイン）`
+- **Redirect URLs** に追加：`https://（あなたのNetlifyドメイン）/**`
+
+> メール確認・パスワード再設定・OAuth を使う場合のみ必要です。メール＋パスワード / 匿名ログインだけなら未設定でも動きます。
 
 ---
 
@@ -109,7 +112,7 @@ Supabase → **Authentication → URL Configuration**
 
 ### お客さん
 
-公開 URL（例：`https://your-app.vercel.app/m/7k2m9x4p`）を開くだけ。ログイン不要。
+公開 URL（例：`https://your-app.netlify.app/m/7k2m9x4p`）を開くだけ。ログイン不要。
 
 ---
 
@@ -129,10 +132,10 @@ Supabase → **Authentication → URL Configuration**
 はい。データベースの行レベルセキュリティ（RLS）で、各管理者は自分のメニューだけ編集できます。公開中のメニューだけが URL で閲覧可能になります。
 
 **Q. 画像はどこに保存されますか？**
-Supabase Storage の `menu-images` バケット（公開読み取り）。アップロードは各管理者の自分のフォルダのみ許可されます。
+Supabase Storage の `menu-images` バケット（公開読み取り）。アップロードは各管理者の自分のフォルダのみ許可されます。アップロード前にブラウザ内で幅 1400px / JPEG 品質 0.8 に自動圧縮され、ストレージ消費を抑えます（`src/lib/image.ts`）。
 
 **Q. 独自ドメインは使えますか？**
-Vercel のプロジェクト設定でカスタムドメインを追加し、`NEXT_PUBLIC_SITE_URL` を更新して再デプロイしてください。
+Netlify のプロジェクト構成 → ドメイン管理でカスタムドメインを追加し、`NEXT_PUBLIC_SITE_URL` を更新して再デプロイしてください。
 
 ---
 
