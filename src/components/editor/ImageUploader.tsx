@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/image";
 import { useEditor } from "./context";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +16,7 @@ interface Props {
 }
 
 const ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
-const MAX_MB = 6;
+const MAX_MB = 15;
 
 export function ImageUploader({
   userId,
@@ -49,23 +50,33 @@ export function ImageUploader({
     }
     setBusy(true);
     try {
+      // 縮小・再圧縮（ストレージ節約。失敗しても元ファイルで続行）
+      const image = await compressImage(file);
+
       // お試しモード: アップロードせずブラウザ内でプレビュー表示のみ
       if (demo) {
         const dataUrl: string = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(String(reader.result));
           reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(file);
+          reader.readAsDataURL(image);
         });
         onChange(dataUrl);
         return;
       }
       const supabase = createClient();
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const ext =
+        image.type === "image/jpeg"
+          ? "jpg"
+          : image.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${userId}/${menuId}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("menu-images")
-        .upload(path, file, { cacheControl: "3600", upsert: false });
+        .upload(path, image, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: image.type,
+        });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from("menu-images").getPublicUrl(path);
       onChange(data.publicUrl);

@@ -18,10 +18,12 @@ export function randomSlug(length = 8): string {
 }
 
 export function siteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
-  );
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (explicit) return explicit;
+  // ホスティング側が自動でセットする値をフォールバックに使う
+  if (process.env.URL) return process.env.URL.replace(/\/$/, ""); // Netlify
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // Vercel
+  return "http://localhost:3000";
 }
 
 export function formatDate(iso: string): string {
