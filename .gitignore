@@ -15,3 +15,6 @@ tsconfig.tsbuildinfo
 # Supabase CLI
 supabase/.temp
 supabase/.branches
+
+# 個人メモ（ルート直下のテキストファイル）
+/*.txt

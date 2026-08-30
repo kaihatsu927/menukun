@@ -44,6 +44,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   });
 
   if (error) {
+    console.error("[signUp]", error.status, error.code, error.message);
     return { error: "登録できませんでした。すでに登録済みのメールアドレスの可能性があります。" };
   }
 
