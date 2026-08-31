@@ -48,7 +48,7 @@ export default async function DashboardPage() {
         <ul className="mt-8 grid gap-4 sm:grid-cols-2">
           {list.map((m) => {
             const tpl = getTemplate(m.template);
-            const accent = m.theme?.accent ?? tpl.theme.accent;
+            const accent = m.theme?.accent ?? tpl.theme.accent ?? "#b45309";
             return (
               <li key={m.id}>
                 <Link

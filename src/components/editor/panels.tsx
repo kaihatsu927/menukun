@@ -6,9 +6,13 @@ import { ImageUploader } from "./ImageUploader";
 import { Button, Field, Input, Textarea } from "@/components/ui";
 import {
   ACCENT_PRESETS,
+  CARD_OPTIONS,
   FONT_OPTIONS,
+  HEADING_OPTIONS,
+  IMAGE_FIT_OPTIONS,
   LAYOUT_OPTIONS,
   MOOD_OPTIONS,
+  STYLE_PRESETS,
 } from "@/lib/theme";
 import { regenerateSlug, deleteMenu, setPublished } from "@/app/dashboard/actions";
 import { cn } from "@/lib/utils";
@@ -136,6 +140,28 @@ export function DesignPanel() {
   return (
     <Section title="デザイン" desc="お店の雰囲気に合わせて見た目を調整できます。変更はすぐプレビューに反映されます。">
       <div>
+        <span className="mb-1.5 block text-sm font-medium text-ink-soft">
+          スタイル（まとめて設定）
+        </span>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {STYLE_PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => patchTheme(p.theme)}
+              className="rounded-xl border border-stone-300 bg-white px-3 py-2 text-left transition-colors hover:border-ink"
+            >
+              <span className="block text-sm font-medium text-ink">{p.label}</span>
+              <span className="block text-xs text-stone-400">{p.hint}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-1.5 text-xs text-stone-400">
+          選んだあと、下の項目で細かく調整できます。
+        </p>
+      </div>
+
+      <div>
         <span className="mb-1.5 block text-sm font-medium text-ink-soft">アクセントカラー</span>
         <div className="flex flex-wrap items-center gap-2">
           {ACCENT_PRESETS.map((c) => (
@@ -183,6 +209,24 @@ export function DesignPanel() {
         options={LAYOUT_OPTIONS}
         onChange={(v) => patchTheme({ layout: v })}
       />
+      <OptionRow
+        label="写真の見せ方"
+        value={theme.imageFit}
+        options={IMAGE_FIT_OPTIONS}
+        onChange={(v) => patchTheme({ imageFit: v })}
+      />
+      <OptionRow
+        label="カテゴリー見出しの飾り"
+        value={theme.heading}
+        options={HEADING_OPTIONS}
+        onChange={(v) => patchTheme({ heading: v })}
+      />
+      <OptionRow
+        label="カードの質感"
+        value={theme.card}
+        options={CARD_OPTIONS}
+        onChange={(v) => patchTheme({ card: v })}
+      />
 
       <Field label={`角丸の強さ（${theme.radius}px）`}>
         <input
@@ -203,6 +247,15 @@ export function DesignPanel() {
           className="h-4 w-4 rounded accent-ink"
         />
         カテゴリー見出しを大きく表示する
+      </label>
+      <label className="flex items-center gap-2.5 text-sm">
+        <input
+          type="checkbox"
+          checked={theme.airy}
+          onChange={(e) => patchTheme({ airy: e.target.checked })}
+          className="h-4 w-4 rounded accent-ink"
+        />
+        余白を広めにとる（ゆったり）
       </label>
     </Section>
   );

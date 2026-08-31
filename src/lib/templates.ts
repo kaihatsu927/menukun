@@ -19,7 +19,7 @@ export interface MenuTemplate {
   label: string;
   industry: string;
   summary: string;
-  theme: MenuTheme;
+  theme: Partial<MenuTheme>;
   title: string;
   tagline: string;
   description?: string;
@@ -35,7 +35,7 @@ export const TEMPLATES: MenuTemplate[] = [
     summary: "前菜からメインまで、写真を大きく見せる王道スタイル。",
     title: "お品書き",
     tagline: "旬の食材でつくる一皿",
-    theme: { accent: "#b45309", mood: "warm", font: "mincho", layout: "card", radius: 14, bigHeadings: true },
+    theme: { accent: "#7c2d12", mood: "warm", font: "mincho-old", layout: "card", radius: 12, bigHeadings: false, heading: "serif", card: "flat", imageFit: "contain" },
     show_price: true,
     categories: [
       {
@@ -65,7 +65,7 @@ export const TEMPLATES: MenuTemplate[] = [
     summary: "ドリンクとスイーツを軽やかに。やさしい印象のデザイン。",
     title: "MENU",
     tagline: "ゆっくり過ごすひととき",
-    theme: { accent: "#0f766e", mood: "light", font: "maru", layout: "magazine", radius: 20, bigHeadings: true },
+    theme: { accent: "#0f766e", mood: "sand", font: "maru", layout: "magazine", radius: 20, bigHeadings: true, heading: "plain", card: "shadow", imageFit: "contain" },
     show_price: true,
     categories: [
       {
@@ -95,7 +95,7 @@ export const TEMPLATES: MenuTemplate[] = [
     summary: "品数が多くても見やすい、コンパクトな一覧レイアウト。",
     title: "お品書き",
     tagline: "とりあえず、乾杯。",
-    theme: { accent: "#be123c", mood: "dark", font: "sans", layout: "compact", radius: 10, bigHeadings: false },
+    theme: { accent: "#f43f5e", mood: "noir", font: "sans", layout: "compact", radius: 8, bigHeadings: false, heading: "underline", card: "flat", imageFit: "cover" },
     show_price: true,
     categories: [
       {
@@ -127,7 +127,7 @@ export const TEMPLATES: MenuTemplate[] = [
     summary: "商品カタログとして。価格は任意で隠せます。",
     title: "商品ラインナップ",
     tagline: "毎日を少し豊かにする道具",
-    theme: { accent: "#111827", mood: "mono", font: "sans", layout: "card", radius: 8, bigHeadings: true },
+    theme: { accent: "#111827", mood: "mono", font: "sans", layout: "card", radius: 4, bigHeadings: true, heading: "plain", card: "outline", airy: true, imageFit: "contain" },
     show_price: true,
     categories: [
       {
@@ -153,7 +153,7 @@ export const TEMPLATES: MenuTemplate[] = [
     summary: "メニューと所要時間・料金を並べるサービス業向け。",
     title: "メニュー & 料金",
     tagline: "あなたに合わせたケアを",
-    theme: { accent: "#7c3aed", mood: "light", font: "mincho", layout: "list", radius: 18, bigHeadings: true },
+    theme: { accent: "#7c3aed", mood: "light", font: "serif", layout: "list", radius: 16, bigHeadings: true, heading: "serif", card: "flat", imageFit: "contain" },
     show_price: true,
     categories: [
       {
@@ -183,7 +183,7 @@ export const TEMPLATES: MenuTemplate[] = [
     summary: "カテゴリーも項目もゼロ。自由に組み立てたい方へ。",
     title: "メニュー",
     tagline: "",
-    theme: { accent: "#b45309", mood: "light", font: "sans", layout: "card", radius: 16, bigHeadings: true },
+    theme: { accent: "#b45309", mood: "light", font: "sans", layout: "card", radius: 16, bigHeadings: true, heading: "underline", card: "outline", imageFit: "contain" },
     show_price: true,
     categories: [],
   },

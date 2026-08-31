@@ -1,6 +1,9 @@
 export type ThemeLayout = "card" | "list" | "compact" | "magazine";
-export type ThemeFont = "sans" | "mincho" | "maru";
-export type ThemeMood = "light" | "warm" | "dark" | "mono";
+export type ThemeFont = "sans" | "mincho" | "maru" | "serif" | "mincho-old" | "hand";
+export type ThemeMood = "light" | "warm" | "dark" | "mono" | "sand" | "noir";
+export type ThemeImageFit = "contain" | "cover";
+export type ThemeHeading = "plain" | "underline" | "serif";
+export type ThemeCard = "outline" | "shadow" | "flat";
 
 export interface MenuTheme {
   /** アクセントカラー（ボタンや見出しの色） */
@@ -15,6 +18,14 @@ export interface MenuTheme {
   radius: number;
   /** カテゴリー見出しを大きく見せる */
   bigHeadings: boolean;
+  /** 写真の見せ方：contain=全体を見せる / cover=切り取って迫力重視 */
+  imageFit: ThemeImageFit;
+  /** カテゴリー見出しの飾り */
+  heading: ThemeHeading;
+  /** カードの質感 */
+  card: ThemeCard;
+  /** 余白を広めにとる */
+  airy: boolean;
 }
 
 export const DEFAULT_THEME: MenuTheme = {
@@ -24,6 +35,10 @@ export const DEFAULT_THEME: MenuTheme = {
   layout: "card",
   radius: 16,
   bigHeadings: true,
+  imageFit: "contain",
+  heading: "underline",
+  card: "outline",
+  airy: false,
 };
 
 export interface Profile {

@@ -2,6 +2,7 @@ import { CSSProperties } from "react";
 import { FullMenu, MenuItem, MenuTheme } from "@/lib/types";
 import { formatPrice, themeToCssVars } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import { FontLoader } from "./FontLoader";
 
 interface Props {
   data: FullMenu;
@@ -10,14 +11,20 @@ interface Props {
   preview?: boolean;
 }
 
+function cardClass(card: MenuTheme["card"]): string {
+  if (card === "shadow") return "m-surface shadow-[0_6px_24px_rgba(20,20,20,0.09)]";
+  if (card === "flat") return "m-surface";
+  return "m-surface m-border border"; // outline
+}
+
 export function MenuView({ data, theme, preview = false }: Props) {
   const { menu, categories, items } = data;
   const styleVars = themeToCssVars(theme) as CSSProperties;
+  const airy = theme.airy;
 
   const visibleItems = items.filter((i) => i.is_available || preview);
   const anyImage = visibleItems.some((i) => !!i.image_url);
 
-  // カテゴリーごとにグループ化。未分類はまとめて最後に。
   const sortedCats = [...categories].sort((a, b) => a.position - b.position);
   const groups: { key: string; name: string | null; note: string | null; items: MenuItem[] }[] = [];
 
@@ -43,33 +50,31 @@ export function MenuView({ data, theme, preview = false }: Props) {
 
   return (
     <div className="menu-scope min-h-full" style={styleVars}>
-      <div className="mx-auto max-w-2xl px-5 pb-20 pt-8 sm:px-6">
+      <FontLoader font={theme.font} />
+      <div className={cn("mx-auto max-w-2xl px-5 pb-20 sm:px-6", airy ? "pt-12" : "pt-8")}>
         {/* ---- ヘッダー ---- */}
-        <header className={cn("text-center", hasHeaderImage ? "mb-8" : "mb-10")}>
+        <header className={cn("text-center", airy ? "mb-14" : hasHeaderImage ? "mb-8" : "mb-10")}>
           {hasHeaderImage && (
-            <div
-              className="mb-6 overflow-hidden"
-              style={{ borderRadius: "var(--m-radius)" }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={menu.cover_url!}
-                alt=""
-                className="h-44 w-full object-cover sm:h-56"
-              />
-            </div>
+            <Thumb
+              src={menu.cover_url}
+              name={menu.title}
+              fit={theme.imageFit}
+              className="mb-6 h-44 w-full sm:h-56"
+              radius="var(--m-radius)"
+            />
           )}
           {menu.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={menu.logo_url}
               alt=""
-              className="mx-auto mb-4 h-14 w-14 rounded-full object-cover"
+              className="mx-auto mb-4 h-16 w-16 rounded-full object-cover"
             />
           )}
           <h1
             className={cn(
               "font-bold tracking-tight",
+              theme.heading === "serif" && "font-normal",
               theme.bigHeadings ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl",
             )}
           >
@@ -93,29 +98,17 @@ export function MenuView({ data, theme, preview = false }: Props) {
             {preview ? "項目を追加するとここに表示されます。" : "準備中です。"}
           </p>
         ) : (
-          <div className="space-y-10">
+          <div className={airy ? "space-y-16" : "space-y-10"}>
             {groups.map((g) => (
               <section key={g.key}>
-                {g.name && (
-                  <div className="mb-4">
-                    <h2
-                      className={cn(
-                        "font-semibold",
-                        theme.bigHeadings
-                          ? "text-xl sm:text-2xl"
-                          : "text-base uppercase tracking-wide",
-                      )}
-                    >
-                      <span className="m-accent">{g.name}</span>
-                    </h2>
-                    {g.note && <p className="m-sub mt-1 text-sm">{g.note}</p>}
-                    <div
-                      className="m-hairline mt-3 border-t"
-                      style={{ borderColor: "var(--m-hairline)" }}
-                    />
-                  </div>
-                )}
-                <ItemList items={g.items} theme={theme} menuHasImages={anyImage} menu={data.menu} />
+                {g.name && <CategoryHeading name={g.name} note={g.note} theme={theme} />}
+                <ItemList
+                  items={g.items}
+                  theme={theme}
+                  menuHasImages={anyImage}
+                  menu={data.menu}
+                  airy={airy}
+                />
               </section>
             ))}
           </div>
@@ -129,20 +122,62 @@ export function MenuView({ data, theme, preview = false }: Props) {
   );
 }
 
+/* ---------- カテゴリー見出し ---------- */
+function CategoryHeading({
+  name,
+  note,
+  theme,
+}: {
+  name: string;
+  note: string | null;
+  theme: MenuTheme;
+}) {
+  const big = theme.bigHeadings;
+
+  if (theme.heading === "serif") {
+    return (
+      <div className="mb-5 text-center">
+        <h2 className={cn("m-text font-normal", big ? "text-2xl" : "text-xl")}>{name}</h2>
+        {note && <p className="m-sub mt-1 text-sm">{note}</p>}
+        <div className="mx-auto mt-3 h-px w-10" style={{ background: "var(--m-accent)" }} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4">
+      <h2
+        className={cn(
+          "m-accent font-semibold",
+          big ? "text-xl sm:text-2xl" : "text-base uppercase tracking-wide",
+        )}
+      >
+        {name}
+      </h2>
+      {note && <p className="m-sub mt-1 text-sm">{note}</p>}
+      {theme.heading === "underline" && (
+        <div className="mt-3 border-t" style={{ borderColor: "var(--m-hairline)" }} />
+      )}
+    </div>
+  );
+}
+
 function ItemList({
   items,
   theme,
   menuHasImages,
   menu,
+  airy,
 }: {
   items: MenuItem[];
   theme: MenuTheme;
   menuHasImages: boolean;
   menu: FullMenu["menu"];
+  airy: boolean;
 }) {
   if (theme.layout === "card") {
     return (
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={cn("grid sm:grid-cols-2", airy ? "gap-6" : "gap-4")}>
         {items.map((i) => (
           <CardItem key={i.id} item={i} theme={theme} menu={menu} />
         ))}
@@ -151,17 +186,16 @@ function ItemList({
   }
   if (theme.layout === "magazine") {
     return (
-      <div className="space-y-4">
+      <div className={airy ? "space-y-6" : "space-y-4"}>
         {items.map((i) => (
           <MagazineItem key={i.id} item={i} theme={theme} menu={menu} />
         ))}
       </div>
     );
   }
-  // list / compact
   const compact = theme.layout === "compact";
   return (
-    <div className={compact ? "space-y-2" : "space-y-4"}>
+    <div className={compact ? "space-y-2" : airy ? "space-y-6" : "space-y-4"}>
       {items.map((i) => (
         <RowItem
           key={i.id}
@@ -176,7 +210,54 @@ function ItemList({
   );
 }
 
-/* ---------- 画像なしのときのプレースホルダー ---------- */
+/* ---------- 写真（どんな縦横比でも切れない） ---------- */
+function Thumb({
+  src,
+  name,
+  fit,
+  className,
+  radius,
+}: {
+  src: string | null;
+  name: string;
+  fit: MenuTheme["imageFit"];
+  className?: string;
+  radius?: string;
+}) {
+  return (
+    <div
+      className={cn("relative overflow-hidden", className)}
+      style={radius ? { borderRadius: radius } : undefined}
+    >
+      {src ? (
+        <>
+          {fit === "contain" && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
+              style={{ opacity: 0.5 }}
+            />
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt=""
+            className={cn(
+              "relative z-[1] h-full w-full",
+              fit === "cover" ? "object-cover" : "object-contain",
+            )}
+          />
+        </>
+      ) : (
+        <Placeholder name={name} className="h-full w-full" />
+      )}
+    </div>
+  );
+}
+
 function Placeholder({ name, className }: { name: string; className?: string }) {
   const ch = name.trim().charAt(0) || "・";
   return (
@@ -219,16 +300,14 @@ function CardItem({
 }) {
   return (
     <article
-      className={cn("m-surface m-border overflow-hidden border", !item.is_available && "opacity-50")}
+      className={cn(
+        "overflow-hidden",
+        cardClass(theme.card),
+        !item.is_available && "opacity-50",
+      )}
+      style={{ borderRadius: "var(--m-radius)" }}
     >
-      <div className="aspect-[4/3] w-full overflow-hidden">
-        {item.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.image_url} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <Placeholder name={item.name} className="h-full w-full" />
-        )}
-      </div>
+      <Thumb src={item.image_url} name={item.name} fit={theme.imageFit} className="aspect-[4/3] w-full" />
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-medium leading-snug">{item.name}</h3>
@@ -261,18 +340,19 @@ function MagazineItem({
   return (
     <article
       className={cn(
-        "m-surface m-border flex gap-4 overflow-hidden border p-3",
+        "flex gap-4 overflow-hidden p-3",
+        cardClass(theme.card),
         !item.is_available && "opacity-50",
       )}
+      style={{ borderRadius: "var(--m-radius)" }}
     >
-      <div className="h-24 w-24 shrink-0 overflow-hidden sm:h-28 sm:w-28" style={{ borderRadius: "calc(var(--m-radius) * 0.6)" }}>
-        {item.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.image_url} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <Placeholder name={item.name} className="h-full w-full" />
-        )}
-      </div>
+      <Thumb
+        src={item.image_url}
+        name={item.name}
+        fit={theme.imageFit}
+        className="h-24 w-24 shrink-0 self-center sm:h-28 sm:w-28"
+        radius="calc(var(--m-radius) * 0.6)"
+      />
       <div className="min-w-0 flex-1 py-1">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-medium leading-snug">{item.name}</h3>
@@ -295,6 +375,7 @@ function MagazineItem({
 
 function RowItem({
   item,
+  theme,
   menu,
   compact,
   showThumb,
@@ -314,24 +395,20 @@ function RowItem({
       )}
     >
       {showThumb && (
-        <div
-          className={cn("shrink-0 overflow-hidden", compact ? "h-11 w-11" : "h-16 w-16")}
-          style={{ borderRadius: "calc(var(--m-radius) * 0.5)" }}
-        >
-          {item.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.image_url} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <Placeholder name={item.name} className="h-full w-full" />
-          )}
-        </div>
+        <Thumb
+          src={item.image_url}
+          name={item.name}
+          fit={theme.imageFit}
+          className={cn("shrink-0", compact ? "h-11 w-11" : "h-16 w-16")}
+          radius="calc(var(--m-radius) * 0.5)"
+        />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           <h3 className={cn("font-medium", compact ? "text-[15px]" : "text-base")}>{item.name}</h3>
           {item.badge && <Badge text={item.badge} />}
           <span
-            className="m-hairline mx-1 hidden flex-1 self-center border-b border-dotted sm:block"
+            className="mx-1 hidden flex-1 self-center border-b border-dotted sm:block"
             style={{ borderColor: "var(--m-hairline)" }}
           />
           <PriceTag item={item} menu={menu} />
